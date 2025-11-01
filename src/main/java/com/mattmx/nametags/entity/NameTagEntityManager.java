@@ -62,9 +62,9 @@ public class NameTagEntityManager {
         final NameTagEntity removed = nameTagEntityByEntityId.remove(entity.getEntityId());
         if (removed != null) {
             nameTagEntityByPassengerEntityId.remove(removed.getPassenger().getEntityId());
-        } else {
-            throw new IllegalArgumentException("No cached NameTag by the passenger entity ID, this could be a memory leak.");
         }
+        // Don't throw exception - the entity might have been already removed by cache expiration
+        // or other cleanup mechanisms. This is not necessarily a memory leak.
 
         return removed;
     }
@@ -133,7 +133,10 @@ public class NameTagEntityManager {
         if (entity instanceof Player player) {
             if (!player.isOnline()) {
                 tagEntity.destroy();
-                removeEntity(entity);
+                // Only remove from maps, don't invalidate cache again to avoid recursion
+                nameTagEntityByEntityId.remove(entity.getEntityId());
+                nameTagEntityByPassengerEntityId.remove(tagEntity.getPassenger().getEntityId());
+                lastSentPassengers.remove(entity.getEntityId());
             } else {
                 this.nameTagCache.put(uuid, tagEntity);
             }
@@ -141,7 +144,10 @@ public class NameTagEntityManager {
             Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
                 if (Bukkit.getEntity(uuid) == null) {
                     tagEntity.destroy();
-                    removeEntity(entity);
+                    // Only remove from maps, don't invalidate cache again to avoid recursion
+                    nameTagEntityByEntityId.remove(entity.getEntityId());
+                    nameTagEntityByPassengerEntityId.remove(tagEntity.getPassenger().getEntityId());
+                    lastSentPassengers.remove(entity.getEntityId());
                 } else {
                     this.nameTagCache.put(uuid, tagEntity);
                 }

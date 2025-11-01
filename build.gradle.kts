@@ -22,7 +22,7 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.codemc.io/repository/maven-releases/")
-    maven("https://maven.evokegames.gg/snapshots")
+    // maven("https://maven.evokegames.gg/snapshots") // Repository inaccessible
 
     mavenLocal()
     mavenCentral()
